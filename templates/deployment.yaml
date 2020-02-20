@@ -1,19 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "7daysdie.fullname" . }}
+  name: {{ include "sevendaysdie.fullname" . }}
   labels:
-{{ include "7daysdie.labels" . | indent 4 }}
+{{ include "sevendaysdie.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "7daysdie.name" . }}
+      app.kubernetes.io/name: {{ include "sevendaysdie.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
-        app.kubernetes.io/name: {{ include "7daysdie.name" . }}
+        app.kubernetes.io/name: {{ include "sevendaysdie.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       dnsConfig:
@@ -24,9 +29,46 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      serviceAccountName: {{ template "7daysdie.serviceAccountName" . }}
+      serviceAccountName: {{ template "sevendaysdie.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: copy-serverconfig
+          image: busybox:1.28
+          command: [
+            'sh',
+            '-c',
+            'mkdir -p /app/.local/share/7DaysToDie/; cp /configmap/serverconfig.xml /app/.local/share/7DaysToDie/serverconfig.xml'
+          ]
+          volumeMounts:
+            - name: data
+              mountPath: /app/.local/share/7DaysToDie
+            - name: configmap
+              mountPath: /configmap
+        - name: copy-serveradmin
+          image: busybox:1.28
+          command: [
+            'sh',
+            '-c',
+            'mkdir -p /app/.local/share/7DaysToDie/Saves/; cp /configmap/serveradmin.xml /app/.local/share/7DaysToDie/Saves/serveradmin.xml'
+          ]
+          volumeMounts:
+            - name: data
+              mountPath: /app/.local/share/7DaysToDie
+            - name: configmap
+              mountPath: /configmap
+        - name: chown-configs
+          image: busybox:1.28
+          command: [
+            'sh',
+            '-c',
+            'chown 1000:1000 -R /app/.local/share/7DaysToDie/'
+          ]
+          volumeMounts:
+            - name: data
+              mountPath: /app/.local/share/7DaysToDie
+            - name: configmap
+              mountPath: /configmap
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -34,8 +76,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: SEVEN_DAYS_TO_DIE_CONFIG_FILE
-              value: "/config/serverconfig.xml"
+            #- name: SEVEN_DAYS_TO_DIE_CONFIG_FILE
+            #  value: "/config/serverconfig.xml"
+            - name: SEVEN_DAYS_TO_DIE_TELNET_PASSWORD
+              value: {{ .Values.settings.ControlPanelPassword | quote }}
           ports:
             - name: sevendays-tcp-1
               containerPort: 26900
@@ -58,8 +102,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app/.local/share/7DaysToDie
-            - name: config
-              mountPath: /config
           #livenessProbe:
           #  httpGet:
           #    path: /
@@ -71,16 +113,16 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: config
+        - name: configmap
           configMap:
-            name: {{ template "7daysdie.fullname" . }}
+            name: {{ template "sevendaysdie.fullname" . }}
         - name: data
         {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             {{- if .Values.persistence.existingClaim }}
             claimName: {{ .Values.persistence.existingClaim | quote }}
             {{- else }}
-            claimName: {{ template "7daysdie.fullname" . }}
+            claimName: {{ template "sevendaysdie.fullname" . }}
             {{- end }}
         {{- else }}
           emptyDir: {}

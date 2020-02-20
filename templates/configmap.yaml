@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "7daysdie.fullname" . }}
+  name: {{ include "sevendaysdie.fullname" . }}
   labels:
-{{ include "7daysdie.labels" . | indent 4 }}
+{{ include "sevendaysdie.labels" . | indent 4 }}
 data:
   serveradmin.xml: |
         <?xml version="1.0" encoding="UTF-8"?>
@@ -38,7 +38,9 @@ data:
 
         <adminTools>
             <admins>
-                <!-- <admin steamID="76561198021925107" permission_level="0" /> -->
+                {{- range .Values.admins }}
+                <admin steamID={{ .id | quote }} permission_level={{ .permission | quote }} /> -->
+                {{- end }}
             </admins>
 
             <permissions>
@@ -91,11 +93,11 @@ data:
       <property name="ServerMaxWorldTransferSpeedKiBs" value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
 
       <!-- Slots -->
-      <property name="ServerMaxPlayerCount" value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
-      <property name="ServerReservedSlots"  value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
-      <property name="ServerReservedSlotsPermission"  value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
-      <property name="ServerAdminSlots"  value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
-      <property name="ServerAdminSlotsPermission"  value={{ .Values.settings.ServerMaxWorldTransferSpeedKiBs | quote }} />
+      <property name="ServerMaxPlayerCount" value={{ .Values.settings.ServerMaxPlayerCount | quote }} />
+      <property name="ServerReservedSlots"  value={{ .Values.settings.ServerReservedSlots | quote }} />
+      <property name="ServerReservedSlotsPermission"  value={{ .Values.settings.ServerReservedSlotsPermission | quote }} />
+      <property name="ServerAdminSlots"  value={{ .Values.settings.ServerAdminSlots | quote }} />
+      <property name="ServerAdminSlotsPermission"  value={{ .Values.settings.ServerAdminSlotsPermission | quote }} />
 
       <!-- Admin interfaces -->
       <property name="ControlPanelEnabled" value="true"/>                         <!-- Enable/Disable the web control panel -->
@@ -109,7 +111,7 @@ data:
       <property name="TelnetFailedLoginsBlocktime" value="10"/>                            <!-- How long will the block persist (in seconds) -->
       <property name="TerminalWindowEnabled" value="true"/>                          <!-- Show a terminal window for log output / command input (Windows only) -->
       <!-- Folder and file locations -->
-      <property name="AdminFileName" value="/config/serveradmin.xml"/>       <!-- Server admin file name. Path relative to the SaveGameFolder -->
+      <property name="AdminFileName" value="serveradmin.xml"/>       <!-- Server admin file name. Path relative to the SaveGameFolder -->
       <!-- <property name="UserDataFolder" value="absolute path" /> -->    <!-- Use this to override where the server stores all generated data, including RWG generated worlds. Do not forget to uncomment the entry! -->
       <!-- <property name="SaveGameFolder" value="absolute path" /> -->    <!-- Use this to only override the save game path. Do not forget to uncomment the entry! -->
 
@@ -125,7 +127,7 @@ data:
       <property name="GameWorld" value={{ .Values.settings.GameWorld | quote }} />
       <property name="WorldGenSeed" value={{ .Values.settings.WorldGenSeed | quote }} />
       <property name="WorldGenSize" value={{ .Values.settings.WorldGenSize | quote }} />
-      <property name="GameName" value{{ .Values.settings.GameName | quote }} />
+      <property name="GameName" value={{ .Values.settings.GameName | quote }} />
       <property name="GameMode" value="GameModeSurvival"/>      <!-- GameModeSurvival -->
 
       <!-- Difficulty -->

@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "7daysdie.name" -}}
+{{- define "sevendaysdie.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "7daysdie.fullname" -}}
+{{- define "sevendaysdie.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "7daysdie.chart" -}}
+{{- define "sevendaysdie.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "7daysdie.labels" -}}
-app.kubernetes.io/name: {{ include "7daysdie.name" . }}
-helm.sh/chart: {{ include "7daysdie.chart" . }}
+{{- define "sevendaysdie.labels" -}}
+app.kubernetes.io/name: {{ include "sevendaysdie.name" . }}
+helm.sh/chart: {{ include "sevendaysdie.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -47,9 +47,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "7daysdie.serviceAccountName" -}}
+{{- define "sevendaysdie.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "7daysdie.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "sevendaysdie.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
