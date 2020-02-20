@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "7daysdie.fullname" . }}-tcp
+  name: tcp-{{ include "7daysdie.fullname" . }}
   labels:
 {{ include "7daysdie.labels" . | indent 4 }}
   annotations:
@@ -17,18 +17,6 @@ spec:
       targetPort: sevendays-tcp-1
       protocol: TCP
       name: sevendays-tcp-1
-      # FIXME - move to new service so it can be optionally exposed
-      # control port
-    - port: 8080
-      targetPort: sevendays-adm-1
-      protocol: TCP
-      name: sevendays-adm-1
-      # FIXME - move to new service so it can be optionally exposed
-      # telnet port
-    - port: 8081
-      targetPort: sevendays-adm-2
-      protocol: TCP
-      name: sevendays-adm-2
   selector:
     app.kubernetes.io/name: {{ include "7daysdie.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -36,7 +24,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "7daysdie.fullname" . }}-udp
+  name: udp-{{ include "7daysdie.fullname" . }}
   labels:
 {{ include "7daysdie.labels" . | indent 4 }}
   annotations:
@@ -63,3 +51,35 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "7daysdie.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adm-{{ include "7daysdie.fullname" . }}
+  labels:
+{{ include "7daysdie.labels" . | indent 4 }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ include "7daysdie.fullname" . }}
+{{- if .Values.service.annotations }}
+{{ toYaml .Values.service.annotations | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  ports:
+      # FIXME - move to new service so it can be optionally exposed
+      # control port
+    - port: 8080
+      targetPort: sevendays-adm-1
+      protocol: TCP
+      name: sevendays-adm-1
+      # FIXME - move to new service so it can be optionally exposed
+      # telnet port
+    - port: 8081
+      targetPort: sevendays-adm-2
+      protocol: TCP
+      name: sevendays-adm-2
+  selector:
+    app.kubernetes.io/name: {{ include "7daysdie.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---

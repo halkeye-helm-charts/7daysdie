@@ -34,7 +34,7 @@ spec:
         {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: adm-{{ $fullName }}
               servicePort: {{ $svcPort }}
         {{- end }}
   {{- end }}
