@@ -1,16 +1,65 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "7daysdie.fullname" . }}
+  name: {{ include "7daysdie.fullname" . }}-tcp
   labels:
 {{ include "7daysdie.labels" . | indent 4 }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ include "7daysdie.fullname" . }}
+{{- if .Values.service.annotations }}
+{{ toYaml .Values.service.annotations | indent 4 }}
+{{- end }}
 spec:
   type: {{ .Values.service.type }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - port: 26900
+      targetPort: sevendays-tcp-1
       protocol: TCP
-      name: http
+      name: sevendays-tcp-1
+      # FIXME - move to new service so it can be optionally exposed
+      # control port
+    - port: 8080
+      targetPort: sevendays-adm-1
+      protocol: TCP
+      name: sevendays-adm-1
+      # FIXME - move to new service so it can be optionally exposed
+      # telnet port
+    - port: 8081
+      targetPort: sevendays-adm-2
+      protocol: TCP
+      name: sevendays-adm-2
+  selector:
+    app.kubernetes.io/name: {{ include "7daysdie.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "7daysdie.fullname" . }}-udp
+  labels:
+{{ include "7daysdie.labels" . | indent 4 }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: {{ include "7daysdie.fullname" . }}
+{{- if .Values.service.annotations }}
+{{ toYaml .Values.service.annotations | indent 4 }}
+{{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  ports:
+    - port: 26900
+      targetPort: sevendays-udp-1
+      protocol: UDP
+      name: sevendays-udp-1
+    - port: 26901
+      targetPort: sevendays-udp-2
+      protocol: UDP
+      name: sevendays-udp-2
+    - port: 26902
+      targetPort: sevendays-udp-3
+      protocol: UDP
+      name: sevendays-udp-3
   selector:
     app.kubernetes.io/name: {{ include "7daysdie.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

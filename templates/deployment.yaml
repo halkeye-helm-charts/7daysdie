@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/name: {{ include "7daysdie.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -29,20 +33,58 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SEVEN_DAYS_TO_DIE_CONFIG_FILE
+              value: "/config/serverconfig.xml"
           ports:
-            - name: http
-              containerPort: 80
+            - name: sevendays-tcp-1
+              containerPort: 26900
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+            - name: sevendays-udp-1
+              containerPort: 26900
+              protocol: UDP
+            - name: sevendays-udp-2
+              containerPort: 26901
+              protocol: UDP
+            - name: sevendays-udp-3
+              containerPort: 26902
+              protocol: UDP
+            - name: sevendays-adm-1
+              containerPort: 8080
+              protocol: TCP
+            - name: sevendays-adm-2
+              containerPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /app/.local/share/7DaysToDie
+            - name: config
+              mountPath: /config
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "7daysdie.fullname" . }}
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            {{- if .Values.persistence.existingClaim }}
+            claimName: {{ .Values.persistence.existingClaim | quote }}
+            {{- else }}
+            claimName: {{ template "7daysdie.fullname" . }}
+            {{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
