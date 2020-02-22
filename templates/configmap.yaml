@@ -60,6 +60,8 @@ data:
                 <permission cmd="listthreads" permission_level="1000" />
                 <permission cmd="memcl" permission_level="1000" />
                 <permission cmd="settempunit" permission_level="1000" />
+                <permission cmd="creativemenu" permission_level="1000" />
+                <permission cmd="saveworld" permission_level="1000" />
             </permissions>
 
             <!-- ONLY PUT ITEMS IN WHITELIST IF YOU WANT WHITELIST ONLY ENABLED!!! -->
