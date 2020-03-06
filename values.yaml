@@ -33,7 +33,6 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  externalTrafficPolicy: Local
   port: 80
   annotations: {}
 
