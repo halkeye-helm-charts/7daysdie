@@ -36,6 +36,10 @@ service:
   port: 80
   annotations: {}
 
+nonGameService:
+  type: ClusterIP
+  annotations: {}
+
 ingress:
   enabled: false
   annotations: {}

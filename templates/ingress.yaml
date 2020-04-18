@@ -33,8 +33,8 @@ spec:
         {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: adm-{{ $fullName }}
-              servicePort: 8080
+              serviceName: {{ $fullName }}
+              servicePort: 8082
         {{- end }}
   {{- end }}
 {{- end }}
