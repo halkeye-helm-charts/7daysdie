@@ -39,29 +39,14 @@ data:
         <adminTools>
             <admins>
                 {{- range .Values.admins }}
-                <admin steamID={{ .id | quote }} permission_level={{ .permission | quote }} /> -->
+                <admin steamID={{ .id | quote }} permission_level={{ .permission | quote }} />
                 {{- end }}
             </admins>
 
             <permissions>
-                <!-- <permission cmd="dm" permission_level="0" /> -->
-                <!-- <permission cmd="kick" permission_level="1" /> -->
-                <!-- <permission cmd="say" permission_level="1000" /> -->
-                <permission cmd="chunkcache" permission_level="1000" />
-                <permission cmd="debugshot" permission_level="1000" />
-                <permission cmd="debugweather" permission_level="1000" />
-                <permission cmd="getgamepref" permission_level="1000" />
-                <permission cmd="getgamestat" permission_level="1000" />
-                <permission cmd="getoptions" permission_level="1000" />
-                <permission cmd="gettime" permission_level="1000" />
-                <permission cmd="gfx" permission_level="1000" />
-                <permission cmd="help" permission_level="1000" />
-                <permission cmd="listplayerids" permission_level="1000" />
-                <permission cmd="listthreads" permission_level="1000" />
-                <permission cmd="memcl" permission_level="1000" />
-                <permission cmd="settempunit" permission_level="1000" />
-                <permission cmd="creativemenu" permission_level="1000" />
-                <permission cmd="saveworld" permission_level="1000" />
+                {{- range $permission, $level := .Values.permissions }}
+                <permission cmd="{{ $permission}}" permission_level="{{ $level }}" />
+                {{- end }}
             </permissions>
 
             <!-- ONLY PUT ITEMS IN WHITELIST IF YOU WANT WHITELIST ONLY ENABLED!!! -->
@@ -69,11 +54,15 @@ data:
             <!-- Nobody can join that ISN'T in the whitelist or admins once whitelist only mode is enabled -->
 
             <whitelist>
-                <!-- <whitelisted steamID="" /> -->
+                {{- range .Values.whitelist }}
+                <whitelisted steamID={{ .id | quote }} />
+                {{- end }}
             </whitelist>
 
             <blacklist>
-                <!-- <blacklisted steamID="" unbandate="" /> -->
+                {{- range .Values.blacklist }}
+                <blacklisted steamID={{ .id | quote }} unbandate={{ .unbandate | quote }} />
+                {{- end }}
             </blacklist>
         </adminTools>
   serverconfig.xml: |
